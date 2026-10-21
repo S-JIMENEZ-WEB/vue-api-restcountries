@@ -24,23 +24,42 @@ const regiones = computed(() => {
   })
 })
 
+
 const paisesFiltrados = computed(() => {
   const texto = busqueda.value.trim().toLocaleLowerCase('es')
+
   return paises.value.filter((pais) => {
-    const nombre = (pais.names?.common || pais.name?.common || '').toLocaleLowerCase('es')
+    const nombreEspanol = nombrePais(pais).toLocaleLowerCase('es')
+    const nombreIngles = (pais.names?.common || pais.name?.common || '').toLocaleLowerCase('es')
     const region = (pais.region || '').toLocaleLowerCase('es')
-    const coincideTexto = !texto || nombre.includes(texto) || region.includes(texto)
-    const coincideRegion = regionSeleccionada.value === 'Todas' || pais.region === regionSeleccionada.value
+
+    const coincideTexto =
+      !texto ||
+      nombreEspanol.includes(texto) ||
+      nombreIngles.includes(texto) ||
+      region.includes(texto)
+
+    const coincideRegion =
+      regionSeleccionada.value === 'Todas' ||
+      pais.region === regionSeleccionada.value
+
     return coincideTexto && coincideRegion
   })
 })
+
 
 const totalPaises = computed(() => paises.value.length)
 const totalRegiones = computed(() => new Set(paises.value.map((p) => p.region).filter(Boolean)).size)
 const poblacionTotal = computed(() => paises.value.reduce((total, pais) => total + (Number(pais.population) || 0), 0))
 
 function nombrePais(pais) {
-  return pais.names?.common || pais.name?.common || 'Nombre no disponible'
+  return (
+    pais.names?.translations?.spa?.common ||
+    pais.translations?.spa?.common ||
+    pais.names?.common ||
+    pais.name?.common ||
+    'Nombre no disponible'
+  )
 }
 
 function capitalPais(pais) {
